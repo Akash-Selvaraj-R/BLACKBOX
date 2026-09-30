@@ -668,7 +668,9 @@ BLACKBOX explores a local-first AI agent architecture intended for Snapdragon-po
 ### After Eclipse
 
 **Akash Selvaraj R**
+
 B.Tech Computer Science and Engineering
+
 SRM Institute of Science and Technology
 
 ---
