@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BLACKBOX - Private Intelligence. On Your Machine. - Technical Project Report</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #6b6b6b; color: #111111;
+    font-family: Arial, Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; background: #F4F0E6;
+    padding: 13mm 14mm 20mm; margin: 0 auto 8mm; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  @media print { body { background: #fff; } .page { margin: 0; } }
+
+  .p-head { display: flex; justify-content: space-between; align-items: baseline;
+    font: 800 7.6pt/1.2 Consolas, "Courier New", monospace; letter-spacing: .14em;
+    border-bottom: 3px solid #111; padding-bottom: 2.5mm; margin-bottom: 5mm; text-transform: uppercase; }
+  .p-head b { background: #2457FF; color: #fff; padding: 1.5px 7px; }
+  .p-foot { position: absolute; left: 14mm; right: 14mm; bottom: 7mm; display: flex;
+    justify-content: space-between; align-items: center; gap: 8mm;
+    font: 800 7pt/1.2 Consolas, "Courier New", monospace; letter-spacing: .12em;
+    border-top: 2.5px solid #111; padding-top: 2.5mm; text-transform: uppercase; }
+  .p-num { background: #111; color: #FFD43B; padding: 2px 9px; font-size: 8.5pt; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 900; }
+  .kicker { font: 900 8pt/1.2 Consolas, "Courier New", monospace; letter-spacing: .18em;
+    text-transform: uppercase; color: #2457FF; margin-bottom: 2.5mm; display: flex; align-items: center; gap: 8px; }
+  .kicker::before { content: ""; width: 26px; height: 4px; background: #111; display: inline-block; }
+  .sec-title { font-size: 32pt; line-height: .92; letter-spacing: -.035em; margin-bottom: 4mm; }
+  .sec-title em { font-style: normal; color: #2457FF; }
+  p { margin: 0 0 3.2mm 0; font-size: 9.3pt; line-height: 1.5; }
+  .lead { font-size: 10.6pt; line-height: 1.45; font-weight: 700; }
+  .mono { font-family: Consolas, "Courier New", monospace; }
+  .small { font-size: 8.3pt; line-height: 1.45; }
+  .tiny { font-size: 7.5pt; line-height: 1.4; }
+  strong { font-weight: 900; }
+  a { color: #2457FF; text-decoration: none; border-bottom: 1.5px solid #111; word-break: break-all; }
+  ul { margin: 0 0 3.2mm 0; padding-left: 5mm; }
+  li { font-size: 9.2pt; line-height: 1.45; margin-bottom: 1.6mm; }
+  li::marker { color: #2457FF; font-weight: 900; }
+
+  .card { background: #FFFDF5; border: 3.5px solid #111; box-shadow: 6px 6px 0 #111; padding: 5mm; }
+  .card.flat { box-shadow: none; }
+  .card.cobalt { background: #2457FF; color: #fff; }
+  .card.cobalt .lbl, .card.ink .lbl { color: #B8FF3D; }
+  .card.ink { background: #111; color: #fff; }
+  .card.ink .lbl { color: #FFD43B; }
+  .card.yellow { background: #FFD43B; }
+  .card.green { background: #B8FF3D; }
+  .card.red { background: #FF4B35; }
+  .card.lav { background: #B8A7FF; }
+  .lbl { font: 900 7.5pt/1.2 Consolas, "Courier New", monospace; letter-spacing: .16em;
+    text-transform: uppercase; display: block; margin-bottom: 2.5mm; color: #2457FF; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4.5mm; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+  .split { display: grid; grid-template-columns: 1.35fr 1fr; gap: 5mm; }
+  .split-l { display: grid; grid-template-columns: 1fr 1.35fr; gap: 5mm; }
+  .stack { display: flex; flex-direction: column; gap: 4.5mm; }
+
+  .badge { display: inline-block; font: 900 7.2pt/1 Consolas, "Courier New", monospace;
+    letter-spacing: .12em; padding: 4px 8px; border: 2.5px solid #111; text-transform: uppercase; }
+  .b-impl { background: #B8FF3D; }
+  .b-target { background: #B8A7FF; }
+  .b-none { background: #FF4B35; }
+  .b-ui { background: #FFD43B; }
+
+  table { width: 100%; border-collapse: collapse; background: #FFFDF5; }
+  th, td { border: 2.5px solid #111; padding: 2.4mm 3mm; text-align: left; vertical-align: top;
+    font-size: 8.4pt; line-height: 1.35; }
+  th { background: #111; color: #fff; font: 900 7.5pt/1.2 Consolas, "Courier New", monospace;
+    letter-spacing: .1em; text-transform: uppercase; }
+  td.m { font-family: Consolas, "Courier New", monospace; font-size: 7.8pt; }
+  tr:nth-child(even) td { background: #F4F0E6; }
+  td.k { font-weight: 900; }
+
+  .flow { display: flex; flex-direction: column; align-items: stretch; }
+  .fbox { border: 3.5px solid #111; background: #FFFDF5; padding: 2.8mm 4mm;
+    font: 900 9.3pt/1.1 Consolas, "Courier New", monospace; letter-spacing: .1em; text-align: center;
+    box-shadow: 4px 4px 0 #111; }
+  .fbox small { display: block; font-size: 6.9pt; letter-spacing: .05em; font-weight: 700; margin-top: 1.2mm; color: #444; }
+  .fbox.c { background: #2457FF; color: #fff; } .fbox.c small { color: #dfe7ff; }
+  .fbox.y { background: #FFD43B; } .fbox.g { background: #B8FF3D; }
+  .fbox.r { background: #FF4B35; } .fbox.l { background: #B8A7FF; }
+  .fbox.k { background: #111; color: #fff; } .fbox.k small { color: #FFD43B; }
+  .farrow { text-align: center; font-size: 14pt; font-weight: 900; line-height: 1.05; padding: 1mm 0; }
+
+  .note { border-left: 7px solid #2457FF; background: #FFFDF5; border-top: 2.5px solid #111;
+    border-right: 2.5px solid #111; border-bottom: 2.5px solid #111; padding: 3.5mm; }
+  .warn { border-left: 7px solid #FF4B35; background: #FFFDF5; border-top: 2.5px solid #111;
+    border-right: 2.5px solid #111; border-bottom: 2.5px solid #111; padding: 3.5mm; }
+  .note p, .warn p { margin-bottom: 1.8mm; font-size: 8.6pt; }
+  .note p:last-child, .warn p:last-child { margin-bottom: 0; }
+  .ttl { font: 900 7.9pt/1.2 Consolas, "Courier New", monospace; letter-spacing: .14em;
+    text-transform: uppercase; display: block; margin-bottom: 1.8mm; }
+
+  pre { margin: 0; font: 700 7.5pt/1.45 Consolas, "Courier New", monospace; white-space: pre-wrap;
+    background: #FFFDF5; border: 3px solid #111; padding: 3.2mm; }
+  pre.ink { background: #111; color: #B8FF3D; }
+
+  .stat { border: 3.5px solid #111; background: #FFFDF5; padding: 3.5mm; box-shadow: 5px 5px 0 #111; }
+  .stat b { display: block; font-size: 27pt; line-height: .9; letter-spacing: -.04em; }
+  .stat span { font: 900 7.2pt/1.3 Consolas, "Courier New", monospace; letter-spacing: .1em; text-transform: uppercase; }
+  .stat.c { background: #2457FF; color: #fff; } .stat.g { background: #B8FF3D; }
+  .stat.y { background: #FFD43B; } .stat.l { background: #B8A7FF; } .stat.r { background: #FF4B35; }
+
+  .rowlab { display: flex; align-items: center; gap: 3mm; font: 900 8.3pt/1.3 Consolas, "Courier New", monospace;
+    letter-spacing: .05em; border: 2.5px solid #111; background: #FFFDF5; padding: 2.4mm 3mm; }
+  .rowlab i { font-style: normal; background: #111; color: #FFD43B; padding: 1px 6px; font-size: 7.3pt; }
+
+  .toc-row { display: flex; align-items: baseline; gap: 4mm; border-bottom: 2px dashed #111; padding: 2.3mm 0; }
+  .toc-row .n { font: 900 9.6pt Consolas, monospace; color: #2457FF; width: 14mm; }
+  .toc-row .t { font-weight: 900; font-size: 10.6pt; letter-spacing: -.01em; }
+  .toc-row .d { flex: 1; border-bottom: 2px dotted #999; transform: translateY(-2px); }
+  .toc-row .p { font: 900 9.6pt Consolas, monospace; background: #111; color: #FFD43B; padding: 1px 7px; }
+  .toc-sub .n { color: #111; } .toc-sub .t { font-weight: 700; font-size: 9.2pt; }
+
+  .cover { padding: 0; background: #F4F0E6; }
+  .cover-grid { position: absolute; inset: 0;
+    background-image: linear-gradient(#11111114 1px, transparent 1px), linear-gradient(90deg, #11111114 1px, transparent 1px);
+    background-size: 28px 28px; }
+  .cover-inner { position: relative; height: 100%; padding: 14mm; display: flex; flex-direction: column; }
+  .cover-top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 5px solid #111; padding-bottom: 5mm; }
+  .cover-brand { display: flex; align-items: center; gap: 4mm; font: 900 15pt/1 Consolas, monospace; letter-spacing: .22em; }
+  .cover-mark { width: 13mm; height: 13mm; background: #2457FF; border: 4px solid #111; box-shadow: 4px 4px 0 #111; display: grid; place-items: center; }
+  .cover-mark i { width: 7mm; height: 7mm; border: 3.5px solid #fff; display: block; }
+  .cover-mono { font: 900 7.6pt/1.5 Consolas, monospace; letter-spacing: .16em; text-align: right; text-transform: uppercase; }
+  .cover-hero { margin-top: auto; }
+  .cover-hero h1 { font-size: 116pt; line-height: .78; letter-spacing: -.055em; }
+  .cover-rule { height: 6px; background: #111; margin: 7mm 0 6mm; }
+  .cover-sub1 { font-size: 30pt; font-weight: 900; line-height: 1.02; letter-spacing: -.02em; }
+  .cover-sub1 em { font-style: normal; color: #2457FF; }
+  .cover-sub2 { font-size: 14pt; font-weight: 900; margin-top: 4mm; }
+  .cover-tags { display: flex; gap: 3mm; margin-top: 6mm; flex-wrap: wrap; }
+  .cover-tag { font: 900 7.5pt/1 Consolas, monospace; letter-spacing: .12em; border: 3px solid #111; padding: 4px 9px; background: #FFFDF5; }
+  .cover-tag.g { background: #B8FF3D; } .cover-tag.y { background: #FFD43B; }
+  .cover-tag.l { background: #B8A7FF; } .cover-tag.r { background: #FF4B35; }
+  .cover-meta { margin-top: auto; display: grid; grid-template-columns: 1.2fr 1fr 1fr; border: 4px solid #111; background: #FFFDF5; box-shadow: 8px 8px 0 #111; }
+  .cover-meta div { padding: 4.5mm; border-right: 2.5px solid #111; }
+  .cover-meta div:last-child { border-right: 0; }
+  .cover-meta span { display: block; font: 900 7pt/1.2 Consolas, monospace; letter-spacing: .16em; color: #2457FF; margin-bottom: 2mm; text-transform: uppercase; }
+  .cover-meta strong { font-size: 9.2pt; line-height: 1.3; display: block; margin-bottom: 1.2mm; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<section class="page cover">
+  <div class="cover-grid"></div>
+  <div class="cover-inner">
+    <div class="cover-top">
+      <div class="cover-brand"><span class="cover-mark"><i></i></span> BLACKBOX</div>
+      <div class="cover-mono">
+        Snapdragon AI Lab<br />Build &amp; Present Challenge<br />
+        <span style="color:#2457FF">Technical Project Report</span>
+      </div>
+    </div>
+
+    <div class="cover-hero">
+      <h1>BLACK<br />BOX</h1>
+      <div class="cover-rule"></div>
+      <div class="cover-sub1">PRIVATE INTELLIGENCE.<br /><em>ON YOUR MACHINE.</em></div>
+      <div class="cover-sub2">Privacy-First Local AI Operating Layer for AI PCs</div>
+      <div class="cover-tags">
+        <span class="cover-tag g">LOCAL-FIRST</span>
+        <span class="cover-tag y">HUMAN APPROVAL</span>
+        <span class="cover-tag l">AI PC / NPU-READY</span>
+        <span class="cover-tag r">NO CLOUD AI</span>
+        <span class="cover-tag">NEXT.JS 16 &middot; REACT 19 &middot; TS 5.7</span>
+      </div>
+    </div>
+
+    <div class="cover-meta">
+      <div>
+        <span>Project</span>
+        <strong>BLACKBOX &mdash; Privacy-First Local AI Operating Layer for AI PCs</strong>
+        <strong class="mono" style="font-weight:700;font-size:8pt">Interface layer, Build 0.1.0 / SYS.01</strong>
+      </div>
+      <div>
+        <span>Author / Developer</span>
+        <strong>BLACKBOX Development Team</strong>
+        <strong class="mono" style="font-weight:700;font-size:8pt">Independent build submission</strong>
+      </div>
+      <div>
+        <span>Repository / Submission</span>
+        <strong class="mono" style="font-size:8.3pt">blackbox-ai-agent</strong>
+        <strong class="mono" style="font-size:8.3pt;font-weight:700">Next.js &middot; TypeScript &middot; Tailwind</strong>
+        <strong class="mono" style="font-size:8.3pt;font-weight:700">Submitted 30 September 2026</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CONTENTS ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>CONTENTS</b></div>
+  <div class="kicker">Document map</div>
+  <h1 class="sec-title">TABLE OF <em>CONTENTS</em></h1>
+
+  <div class="note" style="margin-bottom:5mm">
+    <span class="ttl">How to read this report</span>
+    <p>Every technical statement below was checked against the source repository before writing. Each section
+    carries a status marker so the reader can separate what is <strong>running in code today</strong> from what is
+    <strong>designed and targeted next</strong>:</p>
+    <p style="margin-top:2.2mm">
+      <span class="badge b-impl">IMPLEMENTED</span>
+      <span class="badge b-ui">UI DECLARED</span>
+      <span class="badge b-target">TARGET</span>
+      <span class="badge b-none">NOT PRESENT</span>
+    </p>
+    <p class="small" style="margin-top:2.2mm"><strong>IMPLEMENTED</strong> = verified in source and exercised by the build.
+    <strong>UI DECLARED</strong> = a label or fixture rendered by the interface, not backed by a runtime in this repository.
+    <strong>TARGET</strong> = architecture direction, not yet present in this repository.
+    <strong>NOT PRESENT</strong> = explicitly absent and never claimed as working.</p>
+  </div>
+
+  <div class="toc-row"><span class="n">01</span><span class="t">Abstract</span><span class="d"></span><span class="p">3</span></div>
+  <div class="toc-row"><span class="n">02</span><span class="t">Problem Statement</span><span class="d"></span><span class="p">4</span></div>
+  <div class="toc-row"><span class="n">03</span><span class="t">Proposed Solution</span><span class="d"></span><span class="p">5</span></div>
+  <div class="toc-row"><span class="n">04</span><span class="t">System Objectives</span><span class="d"></span><span class="p">6</span></div>
+  <div class="toc-row"><span class="n">05</span><span class="t">System Architecture</span><span class="d"></span><span class="p">7</span></div>
+  <div class="toc-row toc-sub"><span class="n">5.1</span><span class="t">Architecture diagram</span><span class="d"></span><span class="p">7</span></div>
+  <div class="toc-row toc-sub"><span class="n">5.2</span><span class="t">Layer notes and interfaces</span><span class="d"></span><span class="p">8</span></div>
+  <div class="toc-row"><span class="n">06</span><span class="t">Technology Stack</span><span class="d"></span><span class="p">9</span></div>
+  <div class="toc-row"><span class="n">07</span><span class="t">Frontend Architecture</span><span class="d"></span><span class="p">10</span></div>
+  <div class="toc-row toc-sub"><span class="n">7.1</span><span class="t">Application shell and routing</span><span class="d"></span><span class="p">10</span></div>
+  <div class="toc-row toc-sub"><span class="n">7.2</span><span class="t">Components, state and design system</span><span class="d"></span><span class="p">11</span></div>
+  <div class="toc-row"><span class="n">08</span><span class="t">Backend Architecture</span><span class="d"></span><span class="p">12</span></div>
+  <div class="toc-row"><span class="n">09</span><span class="t">AI Agent Pipeline</span><span class="d"></span><span class="p">13</span></div>
+  <div class="toc-row toc-sub"><span class="n">9.1</span><span class="t">Observe / Understand / Plan</span><span class="d"></span><span class="p">13</span></div>
+  <div class="toc-row toc-sub"><span class="n">9.2</span><span class="t">Approve / Execute / Verify / Report</span><span class="d"></span><span class="p">14</span></div>
+  <div class="toc-row"><span class="n">10</span><span class="t">Security and Privacy</span><span class="d"></span><span class="p">15</span></div>
+  <div class="toc-row"><span class="n">11</span><span class="t">Demo Workspace</span><span class="d"></span><span class="p">16</span></div>
+  <div class="toc-row"><span class="n">12</span><span class="t">User Experience</span><span class="d"></span><span class="p">17</span></div>
+  <div class="toc-row"><span class="n">13</span><span class="t">Task Execution and Approval</span><span class="d"></span><span class="p">18</span></div>
+  <div class="toc-row"><span class="n">14</span><span class="t">Real-Time Event Flow</span><span class="d"></span><span class="p">19</span></div>
+  <div class="toc-row"><span class="n">15</span><span class="t">Data Model</span><span class="d"></span><span class="p">20</span></div>
+  <div class="toc-row"><span class="n">16</span><span class="t">AI Model / Provider Architecture</span><span class="d"></span><span class="p">21</span></div>
+  <div class="toc-row"><span class="n">17</span><span class="t">Snapdragon AI PC Alignment</span><span class="d"></span><span class="p">22</span></div>
+  <div class="toc-row"><span class="n">18</span><span class="t">Performance</span><span class="d"></span><span class="p">23</span></div>
+  <div class="toc-row"><span class="n">19</span><span class="t">Testing</span><span class="d"></span><span class="p">24</span></div>
+  <div class="toc-row"><span class="n">20</span><span class="t">Limitations</span><span class="d"></span><span class="p">25</span></div>
+  <div class="toc-row"><span class="n">21</span><span class="t">Future Enhancements</span><span class="d"></span><span class="p">26</span></div>
+  <div class="toc-row"><span class="n">22</span><span class="t">Conclusion</span><span class="d"></span><span class="p">27</span></div>
+  <div class="toc-row"><span class="n">23</span><span class="t">References and Resources</span><span class="d"></span><span class="p">28</span></div>
+  <div class="toc-row"><span class="n">24</span><span class="t">Appendix</span><span class="d"></span><span class="p">29</span></div>
+  <div class="toc-row toc-sub"><span class="n">A</span><span class="t">Project structure, demo command, task lifecycle</span><span class="d"></span><span class="p">29</span></div>
+  <div class="toc-row toc-sub"><span class="n">B</span><span class="t">Claim-to-source verification map</span><span class="d"></span><span class="p">30</span></div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Private Intelligence. On Your Machine.</span><span class="p-num">02</span></div>
+</section>

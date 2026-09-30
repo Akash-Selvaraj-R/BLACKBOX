@@ -1,0 +1,164 @@
+<!-- ============================ 05 ARCHITECTURE / DIAGRAM ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>05 SYSTEM ARCHITECTURE</b></div>
+  <div class="sec-num">05</div>
+  <div class="kicker">Section 05.1</div>
+  <h1 class="sec-title">SYSTEM <em>ARCHITECTURE</em></h1>
+
+  <p class="small" style="margin-bottom:4mm;max-width:150mm">Green-bordered layers are present in the repository
+  today. Lavender layers are specified targets described in Sections 08, 14, 15 and 16. Nothing in the diagram is
+  claimed as running unless it is marked <span class="badge b-impl">IMPLEMENTED</span>.</p>
+
+  <div class="split" style="gap:5mm;align-items:start">
+    <div class="flow">
+      <div class="fbox c">FRONTEND &mdash; NEXT.JS 16 + REACT 19 + TYPESCRIPT <small>app/ + components/ &middot; client component with 8 operating surfaces</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox g">TASK CONTROL LAYER (IN-BROWSER STATE) <small>useState reducer: idle &rarr; approval &rarr; running &rarr; complete</small></div>
+      <div class="farrow">&darr; <span class="tiny mono">target interface</span></div>
+      <div class="fbox l">FASTAPI-STYLE SERVICE LAYER &mdash; TARGET <small>not in repository: HTTP API, request/response models</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox l">AGENT ORCHESTRATOR &mdash; TARGET <small>drives the seven pipeline stages</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="grid2" style="gap:4mm">
+        <div class="flow" style="gap:3mm">
+          <div class="fbox">OBSERVATION <small>scan authorized tree</small></div>
+          <div class="fbox">UNDERSTANDING <small>classify structure</small></div>
+          <div class="fbox">PLANNING <small>operation list</small></div>
+          <div class="fbox r">APPROVAL <small>human gate</small></div>
+        </div>
+        <div class="flow" style="gap:3mm">
+          <div class="fbox">EXECUTION <small>apply approved ops</small></div>
+          <div class="fbox">VERIFICATION <small>plan vs result</small></div>
+          <div class="fbox k">REPORTING <small>evidence + summary</small></div>
+          <div class="fbox l"><span class="tiny">AUDIT LOG &mdash; TARGET</span></div>
+        </div>
+      </div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox l">AI PROVIDER ABSTRACTION &mdash; TARGET <small>provider interface, model selection, prompt adapter</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox l">LOCAL AI RUNTIME &mdash; TARGET <small>ONNX Runtime / local model session</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox y">ACCELERATION TARGETS &mdash; CPU / GPU / NPU <small>AI-Hub-compatible integration is a target, not a verified capability</small></div>
+    </div>
+
+    <div class="stack">
+      <div class="card flat">
+        <span class="lbl">Supporting layers</span>
+        <div class="flow" style="gap:3mm">
+          <div class="fbox g">SECURITY LAYER <small>IMPLEMENTED: approval gate, cancel path, no-op without intent</small></div>
+          <div class="fbox l" style="box-shadow:none">PATH / WORKSPACE LAYER <small>TARGET: workspace allow-list, traversal checks</small></div>
+          <div class="fbox l" style="box-shadow:none">FILE OPERATIONS <small>TARGET: move / rename / create / index</small></div>
+          <div class="fbox l" style="box-shadow:none">SQLITE TASK HISTORY <small>TARGET: runs, plans, approvals, results</small></div>
+          <div class="fbox l" style="box-shadow:none">SSE / WEBSOCKET STREAM <small>TARGET: live stage + operation events</small></div>
+          <div class="fbox y" style="box-shadow:none">ACTIVITY EVENT LOG <small>IMPLEMENTED as a static fixture array</small></div>
+        </div>
+      </div>
+      <div class="card yellow flat">
+        <span class="ttl" style="color:#111">Colour key</span>
+        <p class="small" style="margin:0"><span class="badge b-impl">IMPLEMENTED</span> running code in this
+        repository.<br /><span class="badge b-ui">UI DECLARED</span> interface fixture or label.<br />
+        <span class="badge b-target">TARGET</span> specified, not present.</p>
+      </div>
+      <div class="note">
+        <span class="ttl">Contract that matters</span>
+        <p class="small">Whatever runtime is added, the boundary stays the same: the UI may only reach the
+        orchestrator through an explicit interface, and the orchestrator may only reach the file system through an
+        authorized workspace scope. That contract is already expressed by the interface's approval gate.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 05.1 &middot; Architecture Diagram</span><span class="p-num">07</span></div>
+</section>
+
+<!-- ============================ 05 ARCHITECTURE / NOTES ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>05 SYSTEM ARCHITECTURE</b></div>
+  <div class="sec-num">05</div>
+  <div class="kicker">Section 05.2</div>
+  <h1 class="sec-title">LAYERS AND <em>INTERFACES</em></h1>
+
+  <table style="margin-bottom:5mm">
+    <tr><th style="width:22%">Layer</th><th style="width:41%">Responsibility</th><th style="width:22%">Interface today</th><th style="width:15%">Status</th></tr>
+    <tr><td class="k">Frontend shell</td><td>Top bar, sidebar navigation, surface header, footer, responsive drawer below 700&nbsp;px.</td><td class="m">app/layout.tsx, components/blackbox-command-center.tsx</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Operating surfaces</td><td>Eight screens: COMMAND, WORKSPACE, TASKS, ACTIVITY, AGENTS, MODELS, REPORTS, SYSTEM.</td><td class="m">one React function per surface</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Task control layer</td><td>Holds task state, enforces the approval gate, drives pipeline progress and status labels.</td><td class="m">useState + startTask / approveTask</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Design system</td><td>Colour tokens, zero radius, thick borders, hard offset shadows, mono labels, responsive rules.</td><td class="m">app/globals.css</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Service / API layer</td><td>HTTP endpoints, request/response validation, orchestration entry points.</td><td class="m">none &mdash; no API routes exist</td><td><span class="badge b-target">TARGET</span></td></tr>
+    <tr><td class="k">Agent orchestrator</td><td>Schedules pipeline stages, streams stage events, manages cancellation.</td><td class="m">none</td><td><span class="badge b-target">TARGET</span></td></tr>
+    <tr><td class="k">Security / workspace layer</td><td>Workspace allow-list, path validation and traversal protection for every operation.</td><td class="m">none &mdash; no file I/O in code</td><td><span class="badge b-target">TARGET</span></td></tr>
+    <tr><td class="k">AI provider layer</td><td>Provider interface, prompt adaptation, model selection, local runtime session.</td><td class="m">none &mdash; ONNX appears as a label only</td><td><span class="badge b-target">TARGET</span></td></tr>
+    <tr><td class="k">Persistence</td><td>Task history, plans, approvals, verification results.</td><td class="m">none &mdash; no database or storage API used</td><td><span class="badge b-target">TARGET</span></td></tr>
+    <tr><td class="k">Event stream</td><td>Live stage, operation and verification events to the UI.</td><td class="m">none &mdash; ACTIVITY shows a fixed array</td><td><span class="badge b-target">TARGET</span></td></tr>
+  </table>
+
+  <div class="grid2" style="margin-bottom:5mm">
+    <div class="card flat">
+      <span class="lbl">Verified absence (repository-wide search)</span>
+      <table>
+        <tr><th>Pattern searched</th><th>Occurrences</th></tr>
+        <tr><td class="m">fetch(</td><td class="m">0</td></tr>
+        <tr><td class="m">EventSource / WebSocket</td><td class="m">0</td></tr>
+        <tr><td class="m">localStorage</td><td class="m">0</td></tr>
+        <tr><td class="m">sqlite / database client</td><td class="m">0</td></tr>
+        <tr><td class="m">onnxruntime / Qualcomm</td><td class="m">0</td></tr>
+        <tr><td class="m">useEffect (side effects)</td><td class="m">0</td></tr>
+        <tr><td class="m">setTimeout (only the approval timer)</td><td class="m">1</td></tr>
+      </table>
+    </div>
+    <div class="stack">
+      <div class="card green flat">
+        <span class="ttl" style="color:#111">Build verified for this report</span>
+        <p class="small" style="margin:0"><span class="mono">pnpm install --frozen-lockfile</span> &rarr; success.<br />
+        <span class="mono">pnpm build</span> &rarr; "Compiled successfully", static routes
+        <span class="mono">/</span> and <span class="mono">/_not-found</span>.<br />
+        <span class="mono">npx tsc --noEmit</span> &rarr; exit code 0 (no type errors).</p>
+      </div>
+      <div class="warn">
+        <span class="ttl">Configuration note</span>
+        <p class="small"><span class="mono">next.config.mjs</span> sets
+        <span class="mono">typescript.ignoreBuildErrors: true</span>, so <span class="mono">next build</span> skips
+        type validation. Type checking was therefore run separately (and passes) rather than relying on the build.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 05.2 &middot; Layers and Interfaces</span><span class="p-num">08</span></div>
+</section>
+
+<!-- ============================ 06 STACK ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>06 TECHNOLOGY STACK</b></div>
+  <div class="sec-num">06</div>
+  <div class="kicker">Section 06</div>
+  <h1 class="sec-title">TECHNOLOGY <em>STACK</em></h1>
+
+  <p class="small" style="margin-bottom:4mm">Only technologies that appear in <span class="mono">package.json</span>,
+  the source files or the build configuration are listed. Vite, FastAPI, SQLite, WebSocket/SSE libraries, ONNX
+  Runtime and test frameworks are <strong>not</strong> part of this repository and are therefore excluded from this
+  table.</p>
+
+  <table style="margin-bottom:5mm">
+    <tr><th style="width:23%">Technology</th><th style="width:37%">Purpose</th><th style="width:26%">Where used</th><th style="width:14%">Status</th></tr>
+    <tr><td class="k">Next.js 16.3.3</td><td>App Router framework, production build, static prerendering, metadata API.</td><td class="m">app/, next.config.mjs, package.json</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">React 19.2.4</td><td>Component model, hooks-based UI state.</td><td class="m">components/blackbox-command-center.tsx</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">TypeScript 5.7.3</td><td>Typed surfaces, state union types, strict compiler mode.</td><td class="m">tsconfig.json (strict: true)</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Tailwind CSS 4.3.3</td><td>Utility layer plus the custom Neo-Brutalist stylesheet, wired through PostCSS.</td><td class="m">app/globals.css, postcss.config.mjs</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">tw-animate-css 1.4.0</td><td>Animation utility imports (transitions are disabled under reduced-motion).</td><td class="m">app/globals.css line 2</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Lucide React 1.16</td><td>Icon set for navigation, status and action buttons.</td><td class="m">blackbox-command-center.tsx (19 icons imported)</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Base UI React 1.5</td><td>Headless button primitive behind the shadcn-style Button component.</td><td class="m">components/ui/button.tsx</td><td><span class="badge b-impl">IMPLEMENTED</span><br /><span class="tiny">component currently unused</span></td></tr>
+    <tr><td class="k">CVA + clsx + tailwind-merge</td><td>Variant composition and class merging for the button component.</td><td class="m">components/ui/button.tsx, lib/utils.ts</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">shadcn 4.19</td><td>Component scaffold configuration (style "base-nova", RSC enabled).</td><td class="m">components.json</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Vercel Analytics 1.6.1</td><td>Anonymous usage analytics, rendered only when NODE_ENV is production.</td><td class="m">app/layout.tsx line 45</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">pnpm 11.23 (workspace)</td><td>Dependency installation and script execution; lockfile-frozen installs.</td><td class="m">pnpm-lock.yaml, pnpm-workspace.yaml</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+    <tr><td class="k">Node.js 24 / build toolchain</td><td>Local build and type-check environment used to verify this report.</td><td class="m">scripts: dev / build / start</td><td><span class="badge b-impl">IMPLEMENTED</span></td></tr>
+  </table>
+
+  <div class="grid3">
+    <div class="card cobalt flat"><span class="lbl">Explicitly not used</span><p class="tiny" style="margin:0;color:#fff">Vite &middot; FastAPI &middot; Python &middot; SQLite &middot; SSE/WebSocket &middot; ONNX Runtime &middot; Qualcomm SDKs &middot; Jest/Vitest &middot; Docker</p></div>
+    <div class="card flat"><span class="ttl">Scripts available</span><p class="tiny mono" style="margin:0">pnpm dev &rarr; next dev<br />pnpm build &rarr; next build<br />pnpm start &rarr; next start<br /><strong>no test or lint script exists</strong></p></div>
+    <div class="card yellow flat"><span class="ttl" style="color:#111">Config flags</span><p class="tiny mono" style="margin:0">typescript.ignoreBuildErrors: true<br />images.unoptimized: true<br />strict: true (tsconfig)</p></div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 06 &middot; Technology Stack</span><span class="p-num">09</span></div>
+</section>

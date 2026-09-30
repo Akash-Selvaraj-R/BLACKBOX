@@ -1,0 +1,236 @@
+<!-- ============================ 07 FRONTEND / SHELL ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>07 FRONTEND ARCHITECTURE</b></div>
+  <div class="sec-num">07</div>
+  <div class="kicker">Section 07.1</div>
+  <h1 class="sec-title">FRONTEND <em>ARCHITECTURE</em></h1>
+
+  <p class="lead" style="margin-bottom:4mm">The application is a single-page Next.js App Router build: one root
+  layout, one route, and one client component that owns every operating surface.</p>
+
+  <div class="split" style="margin-bottom:5mm">
+    <div class="card flat">
+      <span class="lbl">Build stack (as implemented)</span>
+      <p class="small"><strong>React 19</strong> with <strong>TypeScript 5.7</strong> under
+      <span class="mono">strict: true</span>. <strong>Tailwind CSS 4</strong> is loaded through
+      <span class="mono">@tailwindcss/postcss</span>, and the product's visual identity lives in a hand-written
+      Neo-Brutalist stylesheet (<span class="mono">app/globals.css</span>, ~13.8&nbsp;KB) rather than in generated
+      component classes. <strong>Vite is not used</strong> &mdash; bundling and dev server come from Next.js 16
+      (Turbopack), as shown by the build output.</p>
+      <p class="small" style="margin-bottom:0">Route handling is deliberately minimal:
+      <span class="mono">app/page.tsx</span> returns <span class="mono">&lt;BlackboxCommandCenter /&gt;</span> and
+      nothing else. Navigation between screens is client-side state, not routing.</p>
+    </div>
+    <div class="card flat">
+      <span class="lbl">Application shell</span>
+      <table>
+        <tr><th>Element</th><th>Behaviour</th></tr>
+        <tr><td class="k">Top bar</td><td>Brand mark, tagline "LOCAL / CONTROLLED / AI-READY", live task status chip.</td></tr>
+        <tr><td class="k">Sidebar</td><td>8 nav items with icons, active cobalt block with offset shadow, system status stack (LOCAL / AUTHORIZED / PRIVATE), build stamp "SYS.01 / BUILD 0.1.0".</td></tr>
+        <tr><td class="k">Surface header</td><td>Eyebrow "BLACKBOX / &lt;SURFACE&gt;", oversized headline, supporting line, "LOCAL 01 AUTHORIZED" stamp.</td></tr>
+        <tr><td class="k">Footer</td><td>"PRIVATE INTELLIGENCE. ON YOUR MACHINE." and "LOCAL / CONTROLLED / YOURS".</td></tr>
+        <tr><td class="k">Mobile</td><td>Below 700&nbsp;px the sidebar becomes an off-canvas drawer toggled by the menu button.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:5mm">
+    <div class="card flat">
+      <span class="lbl">File map</span>
+      <pre>blackbox-ai-agent/
+├── app/
+│   ├── layout.tsx        49 lines  root layout + metadata
+│   ├── page.tsx           5 lines  renders command center
+│   └── globals.css       19 lines  design system (long-form rules)
+├── components/
+│   ├── blackbox-command-center.tsx
+│   │                      92 lines  shell + 8 surfaces
+│   └── ui/button.tsx     58 lines  CVA button (unused)
+├── lib/utils.ts           6 lines  cn() class merger
+├── public/                      icons, placeholders
+├── next.config.mjs              build config
+├── tsconfig.json                strict TS config
+└── package.json                 deps + scripts</pre>
+    </div>
+    <div class="stack">
+      <div class="card yellow flat">
+        <span class="ttl" style="color:#111">Surface components (one function each)</span>
+        <p class="tiny mono" style="margin:0;line-height:1.6">BlackboxCommandCenter &mdash; shell + state<br />
+        CommandSurface &mdash; input, pipeline, approval, completion<br />
+        WorkspaceSurface &mdash; folders + inspector<br />
+        TasksSurface &mdash; task detail + queue<br />
+        ActivitySurface &mdash; event console + inspector<br />
+        AgentsSurface &mdash; 6 agent cards<br />
+        ModelsSurface &mdash; model board + specs<br />
+        ReportsSurface &mdash; verification report<br />
+        SystemSurface &mdash; instrument panel</p>
+      </div>
+      <div class="note">
+        <span class="ttl">Scope discipline</span>
+        <p class="small">There is <strong>no FILES screen</strong>, <strong>no PERFORMANCE screen</strong> and
+        <strong>no SETTINGS screen</strong> in the code. The settings-like surface is named
+        <strong>SYSTEM</strong>, and file browsing is represented by the folder grid inside WORKSPACE. This report
+        documents the surfaces that exist, not the ones the concept implies.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 07.1 &middot; Application Shell</span><span class="p-num">10</span></div>
+</section>
+
+<!-- ============================ 07 FRONTEND / STATE ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>07 FRONTEND ARCHITECTURE</b></div>
+  <div class="sec-num">07</div>
+  <div class="kicker">Section 07.2</div>
+  <h1 class="sec-title">STATE, COMPONENTS <em>&amp; DESIGN</em></h1>
+
+  <div class="split" style="margin-bottom:5mm">
+    <div class="card flat">
+      <span class="lbl">State management (React hooks only)</span>
+      <table>
+        <tr><th>State</th><th>Type</th><th>Purpose</th></tr>
+        <tr><td class="m k">activeNav</td><td class="m">Surface</td><td>Which of the 8 surfaces is rendered.</td></tr>
+        <tr><td class="m k">command</td><td class="m">string</td><td>Free-text intent bound to the COMMAND textarea.</td></tr>
+        <tr><td class="m k">taskState</td><td class="m">TaskState</td><td>idle | approval | running | complete &mdash; the single source of truth for the lifecycle.</td></tr>
+        <tr><td class="m k">sidebarOpen</td><td class="m">boolean</td><td>Mobile drawer visibility.</td></tr>
+        <tr><td class="m k">selectedFolder</td><td class="m">string</td><td>Folder highlighted in WORKSPACE.</td></tr>
+        <tr><td class="m k">selectedEvent</td><td class="m">number</td><td>Row inspected in ACTIVITY.</td></tr>
+        <tr><td class="m k">statusLabel</td><td class="m">memo</td><td>useMemo mapping taskState &rarr; READY / APPROVAL REQUIRED / EXECUTING / VERIFIED.</td></tr>
+      </table>
+      <p class="small" style="margin-top:3mm;margin-bottom:0">No global store, no context provider, no router state,
+      no side-effect hooks. Everything re-renders from six pieces of local state in the shell component.</p>
+    </div>
+    <div class="stack">
+      <div class="card flat">
+        <span class="lbl">Transitions (verbatim logic)</span>
+        <pre>startTask()  : if command empty -> no-op
+               else taskState = 'approval'
+approveTask(): taskState = 'running'
+               setTimeout(+900ms) -> 'complete'
+cancel       : taskState = 'idle'
+NEW TASK     : taskState = 'idle', command = ''
+GENERATE PLAN: disabled while taskState = 'running'</pre>
+      </div>
+      <div class="card flat">
+        <span class="lbl">Pipeline progress mapping</span>
+        <pre>steps = OBSERVE, UNDERSTAND, PLAN, APPROVE,
+        EXECUTE, VERIFY, REPORT
+
+activeUntil = approval -> 3   (APPROVE waiting)
+              running  -> 5   (through VERIFY)
+              complete -> 6   (all seven DONE)
+              idle     -> -1  (all IDLE)</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:5mm">
+    <div class="card flat">
+      <span class="lbl">Design system tokens (app/globals.css)</span>
+      <table>
+        <tr><th>Token</th><th>Value</th><th>Use</th></tr>
+        <tr><td class="k">Paper</td><td class="m">#F4F0E6</td><td>Page and shell background (grid overlay at 28&nbsp;px).</td></tr>
+        <tr><td class="k">White</td><td class="m">#FFFDF5</td><td>Card and panel surfaces.</td></tr>
+        <tr><td class="k">Ink</td><td class="m">#111111</td><td>Text, 3.5&ndash;5&nbsp;px borders, hard offset shadows.</td></tr>
+        <tr><td class="k">Cobalt</td><td class="m">#2457FF</td><td>Active nav, emphasis, metric blocks, focus ring.</td></tr>
+        <tr><td class="k">Red</td><td class="m">#FF4B35</td><td>Warning / approval accents, folder and agent tones.</td></tr>
+        <tr><td class="k">Yellow</td><td class="m">#FFD43B</td><td>Hover states, event inspector, labels.</td></tr>
+        <tr><td class="k">Green</td><td class="m">#B8FF3D</td><td>Success, status chip, approved operations, verification.</td></tr>
+        <tr><td class="k">Lavender</td><td class="m">#B8A7FF</td><td>Planning / model panels.</td></tr>
+        <tr><td class="k">Radius</td><td class="m">0</td><td>Theme sets --radius-sm/md/lg to zero &mdash; square everything.</td></tr>
+      </table>
+    </div>
+    <div class="stack">
+      <div class="card flat">
+        <span class="lbl">Interaction and accessibility</span>
+        <ul class="small" style="margin-bottom:0">
+          <li><span class="mono">aria-label</span> on the menu toggle and the main navigation landmark.</li>
+          <li><span class="mono">htmlFor</span> / <span class="mono">id</span> pairing on the COMMAND textarea.</li>
+          <li><span class="mono">:focus-visible</span> outline: 3&nbsp;px cobalt with 3&nbsp;px offset on buttons and textareas.</li>
+          <li><span class="mono">prefers-reduced-motion</span> disables all transitions.</li>
+          <li>Disabled state on GENERATE PLAN while running or when the command is empty.</li>
+          <li>Two breakpoints: 900&nbsp;px (grid collapse) and 700&nbsp;px (off-canvas nav).</li>
+        </ul>
+      </div>
+      <div class="card lav flat">
+        <span class="ttl" style="color:#111">Typography</span>
+        <p class="tiny" style="margin:0">Display: Arial/Helvetica at weight 900&ndash;950, tight negative tracking,
+        headlines up to ~94&nbsp;px. Technical labels: <span class="mono">ui-monospace</span> at 8&ndash;11&nbsp;px,
+        800&ndash;900 weight, 0.1&ndash;0.18&nbsp;em letter-spacing. Every panel heading, stamp and status chip uses
+        the mono voice; every headline uses the display voice.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 07.2 &middot; State and Design System</span><span class="p-num">11</span></div>
+</section>
+
+<!-- ============================ 08 BACKEND ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>08 BACKEND ARCHITECTURE</b></div>
+  <div class="sec-num">08</div>
+  <div class="kicker">Section 08</div>
+  <h1 class="sec-title">BACKEND <em>ARCHITECTURE</em></h1>
+
+  <div class="warn" style="margin-bottom:5mm">
+    <span class="ttl">Status: target architecture &mdash; no backend exists in this repository</span>
+    <p class="small">There is no FastAPI (or any other) service, no API route, no request/response model, no
+    orchestration process, no executor, no verifier and no task persistence layer in this repository. A
+    repository-wide search returns zero occurrences of <span class="mono">fetch(</span>, database clients and
+    streaming primitives. The page is statically prerendered. This section therefore documents the
+    <strong>intended</strong> backend contract that the implemented interface already assumes &mdash; and it is
+    labelled as target throughout.</p>
+  </div>
+
+  <div class="split" style="margin-bottom:5mm">
+    <div class="card flat">
+      <span class="lbl">What the backend would own</span>
+      <table>
+        <tr><th>Concern</th><th>Planned responsibility</th></tr>
+        <tr><td class="k">Routes</td><td class="m">POST /tasks &middot; GET /tasks/{id}<br class="m" />POST /tasks/{id}/approve<br />POST /tasks/{id}/cancel<br />GET /tasks/{id}/events (SSE)<br />GET /workspaces</td></tr>
+        <tr><td class="k">Models</td><td>Pydantic-style request/response schemas: TaskCreate, Plan, Operation, Approval, TaskResult, Event.</td></tr>
+        <tr><td class="k">Orchestration</td><td>Drive the seven stages, hold cancellation, emit stage transitions.</td></tr>
+        <tr><td class="k">Execution</td><td>Apply approved operations only, inside the authorized workspace scope.</td></tr>
+        <tr><td class="k">Verification</td><td>Re-read the workspace and compare against the planned operations.</td></tr>
+        <tr><td class="k">Persistence</td><td>Store run, plan, approval decision, operations and verification outcome.</td></tr>
+        <tr><td class="k">Streaming</td><td>Push stage/operation events to the UI while a task runs.</td></tr>
+      </table>
+    </div>
+    <div class="stack">
+      <div class="card flat">
+        <span class="lbl">What actually serves the app today</span>
+        <ul class="small" style="margin-bottom:0">
+          <li><strong>Next.js server</strong> prerenders a single static route at build time.</li>
+          <li><strong>Metadata API</strong> in <span class="mono">app/layout.tsx</span> sets title, description,
+          favicon set and theme colours for light/dark.</li>
+          <li><strong>Vercel Analytics</strong> mounts only when
+          <span class="mono">NODE_ENV === 'production'</span> &mdash; the sole network integration in the codebase.</li>
+          <li>All task logic runs in the browser as React state; there is no server round trip in the task flow.</li>
+        </ul>
+      </div>
+      <div class="card flat">
+        <span class="lbl">Interface the UI already implies</span>
+        <pre>Task   { id, title, state, steps[7], queue }
+Plan   { folders, moves, renames, index }
+Event  { time, stage, message }
+Report { files, operations, errors, verification }
+
+state  : idle | approval | running | complete
+gate   : no execution before approval</pre>
+        <p class="small" style="margin-top:3mm;margin-bottom:0">These four shapes are all the front end needs; a
+        future service can implement them without any change to the interface.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="ttl">Why the gap is acceptable at this stage</span>
+    <p class="small">The submission is an <strong>interface-first build</strong>: the control contract (plan &rarr;
+    approve &rarr; execute &rarr; verify &rarr; report) is defined and demonstrable before the runtime exists, so
+    safety semantics are fixed early rather than retro-fitted. Section 21 lists the service layer as the first
+    future work item.</p>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 08 &middot; Backend Architecture</span><span class="p-num">12</span></div>
+</section>

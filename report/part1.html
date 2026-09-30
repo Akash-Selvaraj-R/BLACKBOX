@@ -1,0 +1,224 @@
+<!-- ============================ 01 ABSTRACT ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>01 ABSTRACT</b></div>
+  <div class="sec-num">01</div>
+  <div class="kicker">Section 01</div>
+  <h1 class="sec-title">ABSTRACT</h1>
+
+  <div class="split" style="margin-bottom:5mm">
+    <div>
+      <p class="lead">BLACKBOX is a privacy-first local AI operating layer for AI PCs: it turns a plain-language
+      command into an observable, approvable, verifiable sequence of workspace operations instead of an instant,
+      unauditable answer.</p>
+      <p>The problem it addresses is simple. Cloud assistants move private workspace context off the machine, and
+      when an agent does act on files, the user rarely sees what was planned, what was approved, or whether the
+      result matched the plan. BLACKBOX restructures that interaction into an explicit pipeline &mdash;
+      <span class="mono"><strong>OBSERVE &rarr; UNDERSTAND &rarr; PLAN &rarr; APPROVE &rarr; EXECUTE &rarr; VERIFY &rarr; REPORT</strong></span>
+      &mdash; where nothing executes until a human approves a concrete list of proposed operations, and the run ends
+      with a verification and a report rather than a chat message.</p>
+      <p>The repository delivers this contract as a working interface layer: a Next.js 16 + React 19 + TypeScript
+      application with eight operating surfaces (COMMAND, WORKSPACE, TASKS, ACTIVITY, AGENTS, MODELS, REPORTS,
+      SYSTEM), a four-state task lifecycle with a hard approval gate, and a Neo-Brutalist design system that makes
+      system state legible at a glance. All task state is held in the browser; the app issues no model or file
+      system requests of its own.</p>
+      <p>The inference runtime, file-system executor, and persistence layers are specified in this report as
+      clearly-labelled targets so that local models (ONNX / AI-Hub-style runtimes on CPU, GPU or NPU) can be added
+      behind a provider abstraction without changing the interaction contract. The result is a system designed so
+      that intelligence stays on the machine, actions stay controlled, and every action stays reviewable.</p>
+    </div>
+    <div class="stack">
+      <div class="card cobalt">
+        <span class="lbl">One-line thesis</span>
+        <p style="font-size:13pt;line-height:1.25;font-weight:900;margin:0">Move from<br />"ask &rarr; answer"<br />to<br />"understand &rarr; approve<br />&rarr; act &rarr; verify."</p>
+      </div>
+      <div class="card yellow flat">
+        <span class="lbl" style="color:#111">Delivered in repository</span>
+        <p class="small" style="margin:0"><strong>7 source files</strong> (6 TypeScript/TSX + 1 stylesheet),
+        <strong>8 application surfaces</strong>, <strong>7-stage pipeline UI</strong>,
+        <strong>4-state task lifecycle</strong>, static production build verified.</p>
+      </div>
+      <div class="card lav flat">
+        <span class="lbl" style="color:#111">Specified as target</span>
+        <p class="small" style="margin:0">Local model runtime, file-system executor with path authorisation,
+        task persistence, event streaming, provider abstraction, hardware telemetry.</p>
+      </div>
+      <div class="note">
+        <span class="ttl">Honesty rule used throughout</span>
+        <p class="small">No latency, throughput, memory or NPU figures are reported, because no measurement harness
+        exists in the repository. No Qualcomm NPU execution is claimed, because no vendor runtime is referenced in
+        the code.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid4">
+    <div class="stat c"><b>08</b><span>Operating surfaces</span></div>
+    <div class="stat g"><b>07</b><span>Pipeline stages</span></div>
+    <div class="stat y"><b>04</b><span>Task states</span></div>
+    <div class="stat l"><b>00</b><span>Cloud AI calls</span></div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 01 &middot; Abstract</span><span class="p-num">03</span></div>
+</section>
+
+<!-- ============================ 02 PROBLEM ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>02 PROBLEM STATEMENT</b></div>
+  <div class="sec-num">02</div>
+  <div class="kicker">Section 02</div>
+  <h1 class="sec-title">PROBLEM <em>STATEMENT</em></h1>
+
+  <p class="lead" style="margin-bottom:4mm">Assistants are optimised for response speed, not for controlled action
+  inside a private workspace. Six gaps make them hard to trust with real files.</p>
+
+  <div class="grid2" style="margin-bottom:5mm">
+    <div class="card flat">
+      <span class="lbl">01 &mdash; Cloud dependency</span>
+      <p class="small">Most assistant workflows assume a hosted model. Workspace context &mdash; file names, project
+      structure, document content &mdash; has to leave the device before anything useful happens. For internship
+      reports, client material or internal code, that transfer is the objection, not the latency.</p>
+    </div>
+    <div class="card flat">
+      <span class="lbl">02 &mdash; Private workspace exposure</span>
+      <p class="small">A personal or work workspace is not a prompt. It is a live tree of folders with permissions,
+      drafts and half-finished material. Treating it as model input blurs the boundary between "readable by me" and
+      "readable by a remote service".</p>
+    </div>
+    <div class="card flat">
+      <span class="lbl">03 &mdash; Opaque local file interaction</span>
+      <p class="small">When a tool does touch local files, the user typically sees the result after the fact:
+      folders renamed, documents moved. What was scanned, what was inferred and which operations were considered is
+      rarely visible.</p>
+    </div>
+    <div class="card flat">
+      <span class="lbl">04 &mdash; No transparent execution</span>
+      <p class="small">There is usually no durable record connecting the original request to the individual
+      operations performed, so "it sorted my projects" cannot be decomposed into checkable steps.</p>
+    </div>
+    <div class="card flat">
+      <span class="lbl">05 &mdash; Missing human control point</span>
+      <p class="small">Automation either happens immediately or requires the user to pre-configure rules. There is
+      no middle state where the system proposes exact operations and waits for a person to accept or cancel them.</p>
+    </div>
+    <div class="card flat">
+      <span class="lbl">06 &mdash; No auditable outcome</span>
+      <p class="small">Without verification against the plan and a final report, a user cannot answer the questions
+      that matter: what changed, what failed, and whether the result is what was asked for.</p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="warn">
+      <span class="ttl">What BLACKBOX does not claim</span>
+      <p class="small">This repository does not claim to have defeated these problems end-to-end. It implements the
+      <strong>control surface</strong> for them &mdash; the approval gate, the pipeline state machine, the plan and
+      report views, and the local-only data-route declarations &mdash; and it specifies the runtime layers that
+      complete the loop. Sections 08, 16 and 20 state precisely where the boundary sits.</p>
+    </div>
+    <div class="card green flat">
+      <span class="ttl" style="color:#111">Design requirement derived</span>
+      <p class="small" style="margin-bottom:1.5mm">Any future BLACKBOX runtime must satisfy five conditions:</p>
+      <p class="small mono" style="margin:0"><strong>1.</strong> context stays on device<br />
+      <strong>2.</strong> every operation is listed before it runs<br />
+      <strong>3.</strong> a human approves the list<br />
+      <strong>4.</strong> results are verified against the plan<br />
+      <strong>5.</strong> the run ends in a readable report</p>
+    </div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 02 &middot; Problem Statement</span><span class="p-num">04</span></div>
+</section>
+
+<!-- ============================ 03 SOLUTION ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>03 PROPOSED SOLUTION</b></div>
+  <div class="sec-num">03</div>
+  <div class="kicker">Section 03</div>
+  <h1 class="sec-title">PROPOSED <em>SOLUTION</em></h1>
+
+  <p class="lead" style="margin-bottom:4.5mm">BLACKBOX is a local-first operating layer: a control plane between a
+  person and their machine that converts intent into approved, executed and verified work.</p>
+
+  <div class="split" style="gap:6mm">
+    <div class="flow">
+      <div class="fbox c">USER <small>issues a plain-language command</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox">COMMAND <small>intent captured in the COMMAND surface</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox y">OBSERVE <small>scope the authorized workspace</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox y">UNDERSTAND <small>classify structure and intent</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox l">PLAN <small>produce an exact operation list</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox r">APPROVE <small>human gate: approve or cancel</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox">EXECUTE <small>apply approved operations only</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox g">VERIFY <small>check results against the plan</small></div>
+      <div class="farrow">&darr;</div>
+      <div class="fbox k">REPORT <small>evidence: counts, status, route</small></div>
+    </div>
+
+    <div class="stack">
+      <div class="card flat">
+        <span class="lbl">Why each stage exists</span>
+        <table>
+          <tr><th>Stage</th><th>Reason it is a separate step</th></tr>
+          <tr><td class="k m">COMMAND</td><td>Separates intent capture from execution, so a typed request is a draft, not a trigger.</td></tr>
+          <tr><td class="k m">OBSERVE</td><td>Establishes what is in scope before any interpretation, and defines the authorization boundary.</td></tr>
+          <tr><td class="k m">UNDERSTAND</td><td>Turns raw structure into meaning, so later steps reason about projects, not just paths.</td></tr>
+          <tr><td class="k m">PLAN</td><td>Converts meaning into discrete, countable operations that a human can actually read.</td></tr>
+          <tr><td class="k m">APPROVE</td><td>The single point where authority passes from system to person and back; nothing runs before it.</td></tr>
+          <tr><td class="k m">EXECUTE</td><td>Applies exactly the approved list, keeping the blast radius bounded and predictable.</td></tr>
+          <tr><td class="k m">VERIFY</td><td>Detects drift between plan and outcome; without it, "done" is an assumption.</td></tr>
+          <tr><td class="k m">REPORT</td><td>Compresses the run into auditable evidence the user can keep or re-check.</td></tr>
+        </table>
+      </div>
+      <div class="note">
+        <span class="ttl">Implementation status</span>
+        <p class="small"><span class="badge b-impl">IMPLEMENTED</span> The seven stages are rendered as a live
+        pipeline in the COMMAND surface, and stage progress is driven by the real task state machine
+        (<span class="mono">components/blackbox-command-center.tsx:80</span>).</p>
+        <p class="small"><span class="badge b-target">TARGET</span> Stage internals (scanning, model reasoning,
+        file writes, verification checks) are the runtime described in Sections 08 and 09; they are not present in
+        this repository.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 03 &middot; Proposed Solution</span><span class="p-num">05</span></div>
+</section>
+
+<!-- ============================ 04 OBJECTIVES ============================ -->
+<section class="page">
+  <div class="p-head"><span>BLACKBOX / PROJECT REPORT</span><b>04 SYSTEM OBJECTIVES</b></div>
+  <div class="sec-num">04</div>
+  <div class="kicker">Section 04</div>
+  <h1 class="sec-title">SYSTEM <em>OBJECTIVES</em></h1>
+
+  <p class="lead" style="margin-bottom:4.5mm">Ten objectives define BLACKBOX. Status shows how far the current
+  repository goes against each one.</p>
+
+  <table style="margin-bottom:5mm">
+    <tr><th style="width:6%">#</th><th style="width:24%">Objective</th><th>What it means in practice</th><th style="width:15%">Status</th></tr>
+    <tr><td class="m">O1</td><td class="k">Local-first intelligence</td><td>Reasoning about the workspace must happen on the device, with no workspace content sent to a model service. The app itself performs zero network requests for AI.</td><td><span class="badge b-impl">IMPLEMENTED</span><br /><span class="tiny">no fetch / AI calls in code</span></td></tr>
+    <tr><td class="m">O2</td><td class="k">Controlled file operations</td><td>File changes are modelled as a finite, enumerable operation list (create folders, move files, rename, generate index) rather than open-ended shell freedom.</td><td><span class="badge b-ui">UI DECLARED</span></td></tr>
+    <tr><td class="m">O3</td><td class="k">Explicit workspace authorization</td><td>The user names an authorized directory; the system reports an authorization state (SYSTEM surface: "AUTHORIZED DIRECTORIES 03", sidebar: "AUTHORIZED").</td><td><span class="badge b-ui">UI DECLARED</span></td></tr>
+    <tr><td class="m">O4</td><td class="k">Human approval before action</td><td>A dedicated APPROVAL state blocks execution until the user confirms; cancel returns the task to idle with no side effects.</td><td><span class="badge b-impl">IMPLEMENTED</span><br /><span class="tiny">state machine, lines 58&ndash;59, 81</span></td></tr>
+    <tr><td class="m">O5</td><td class="k">Safe execution</td><td>Only approved operations execute, and execution is time-boxed and cancellable before it starts.</td><td><span class="badge b-target">TARGET</span><br /><span class="tiny">executor not present</span></td></tr>
+    <tr><td class="m">O6</td><td class="k">Verification</td><td>Results are compared against the plan; the pipeline exposes a VERIFY stage and the report carries a verification status.</td><td><span class="badge b-ui">UI DECLARED</span></td></tr>
+    <tr><td class="m">O7</td><td class="k">Task history</td><td>Past runs, their plans, approvals and outcomes are retained and re-readable (TASKS surface, task queue).</td><td><span class="badge b-target">TARGET</span><br /><span class="tiny">in-memory only, resets on reload</span></td></tr>
+    <tr><td class="m">O8</td><td class="k">Modular AI providers</td><td>Inference sits behind a provider interface so local runtimes can be swapped without touching the pipeline contract.</td><td><span class="badge b-target">TARGET</span><br /><span class="tiny">see Section 16</span></td></tr>
+    <tr><td class="m">O9</td><td class="k">AI PC compatibility</td><td>The interface and runtime layers are structured so CPU / GPU / NPU execution choices can be made at runtime, on AI PC hardware.</td><td><span class="badge b-target">TARGET</span></td></tr>
+    <tr><td class="m">O10</td><td class="k">Privacy-oriented architecture</td><td>Local data route by default, no account, no workspace upload path, and an interface that always states the data route.</td><td><span class="badge b-impl">IMPLEMENTED</span><br /><span class="tiny">route shown on 4 surfaces</span></td></tr>
+  </table>
+
+  <div class="grid3">
+    <div class="card green flat"><span class="ttl" style="color:#111">4 objectives partly met</span><p class="small" style="margin:0">O1, O4, O10 hold in code today; O2, O3, O6 are visible as interface commitments.</p></div>
+    <div class="card lav flat"><span class="ttl" style="color:#111">4 objectives specified</span><p class="small" style="margin:0">O5, O7, O8, O9 are designed and documented as targets with no runtime in this repository.</p></div>
+    <div class="card flat"><span class="ttl">Objective traceability</span><p class="small" style="margin:0">Each objective maps to code or to a labelled target in Appendix B (claim-to-source map).</p></div>
+  </div>
+
+  <div class="p-foot"><span>BLACKBOX &middot; Section 04 &middot; System Objectives</span><span class="p-num">06</span></div>
+</section>
